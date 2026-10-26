@@ -2,22 +2,33 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    use HasFactory;
+
+    protected $table = 'products';
+
+    /**
+     * Kolom yang diizinkan untuk diisi secara massal (Mass Assignment)
+     */
     protected $fillable = [
-        'category_id', 
-        'sku', 
-        'name', 
-        'purchase_price', 
-        'selling_price', 
-        'stock', 
-        'minimum_stock'
+        'sku',
+        'name',
+        'price',
+        'stock',
+        'minimum_stock',
+        'category_id',
     ];
 
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
+    /**
+     * Cast tipe data kolom
+     */
+    protected $casts = [
+        'price' => 'decimal:2',
+        'stock' => 'integer',
+        'minimum_stock' => 'integer',
+    ];
 }

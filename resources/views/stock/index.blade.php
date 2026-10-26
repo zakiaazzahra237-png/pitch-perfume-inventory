@@ -1,89 +1,117 @@
-@extends('layouts.app')
+<x-app-layout>
+    <div class="space-y-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-black text-[#2c1d11]">Mutasi Stok Parfum</h1>
+                <p class="text-xs text-[#7a6b5d]">Catat dan pantau transaksi Stok Masuk & Stok Keluar (Penjualan)</p>
+            </div>
+            <div class="bg-[#e8ded1] px-3 py-1.5 rounded-xl text-xs font-bold text-[#2c1d11]">
+                Petugas: {{ Auth::user()->name }} ({{ ucfirst(Auth::user()->role) }})
+            </div>
+        </div>
 
-@section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">Manajemen Stok Masuk & Keluar</h4>
-</div>
+        <!-- Alert Success / Error -->
+        @if(session('success'))
+        <div class="p-3 bg-green-100 border border-green-300 text-green-800 rounded-xl text-xs font-bold">
+            {{ session('success') }}
+        </div>
+        @endif
 
-@if(session('success'))
-    <div class="alert alert-success border-0 rounded-3 mb-4" style="background-color: #d4edda; color: #155724;">
-        {{ session('success') }}
-    </div>
-@endif
+        @if($errors->any())
+        <div class="p-3 bg-red-100 border border-red-300 text-red-800 rounded-xl text-xs font-bold space-y-1">
+            @foreach($errors->all() as $error)
+                <p>⚠️ {{ $error }}</p>
+            @endforeach
+        </div>
+        @endif
 
-@if(session('error'))
-    <div class="alert alert-danger border-0 rounded-3 mb-4" style="background-color: #f8d7da; color: #721c24;">
-        {{ session('error') }}
-    </div>
-@endif
-
-<div class="row g-4 mb-4">
-    <!-- Form Transaksi Stok -->
-    <div class="col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
-            <h6 class="fw-bold mb-3">Catat Mutasi Stok</h6>
-            <form action="{{ route('stock.store') }}" method="POST">
+        <!-- Form Input Mutasi Stok -->
+        <div class="bg-white p-6 rounded-[22px] border border-[#d3c5b4] shadow-sm">
+            <h3 class="text-sm font-bold text-[#2c1d11] mb-4">➕ Form Input Transaksi Stok</h3>
+            
+            <form method="POST" action="{{ route('stock.store') }}" class="space-y-4">
                 @csrf
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Pilih Parfum</label>
-                    <select name="product_id" class="form-select rounded-3" required>
-                        <option value="">-- Pilih Produk --</option>
-                        @foreach($products as $prod)
-                            <option value="{{ $prod->id }}">{{ $prod->name }} (Stok: {{ $prod->stock }})</option>
-                        @endforeach
-                    </select>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Pilih Produk -->
+                    <div>
+                        <label class="block text-xs font-bold text-[#3a2e2b] mb-1">Pilih Produk Parfum</label>
+                        <select name="product_id" required class="w-full px-4 py-2.5 rounded-xl border border-[#d3c5b4] text-xs focus:ring-2 focus:ring-[#8c5a47]">
+                            <option value="">-- Pilih Parfum --</option>
+                            @foreach($products as $p)
+                                <option value="{{ $p->id }}" {{ old('product_id') == $p->id ? 'selected' : '' }}>
+                                    {{ $p->name }} (Sisa Stok: {{ $p->stock }} Botol)
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Jenis Mutasi -->
+                    <div>
+                        <label class="block text-xs font-bold text-[#3a2e2b] mb-1">Jenis Transaksi</label>
+                        <select name="type" required class="w-full px-4 py-2.5 rounded-xl border border-[#d3c5b4] text-xs focus:ring-2 focus:ring-[#8c5a47]">
+                            <option value="in" {{ old('type') == 'in' ? 'selected' : '' }}>🟢 Stok Masuk (Stock-In)</option>
+                            <option value="out" {{ old('type') == 'out' ? 'selected' : '' }}>🔴 Stok Keluar (Stock-Out / Penjualan)</option>
+                        </select>
+                    </div>
+
+                    <!-- Jumlah Botol -->
+                    <div>
+                        <label class="block text-xs font-bold text-[#3a2e2b] mb-1">Jumlah (Botol)</label>
+                        <input type="number" name="quantity" value="{{ old('quantity', 1) }}" min="1" required 
+                            class="w-full px-4 py-2.5 rounded-xl border border-[#d3c5b4] text-xs focus:ring-2 focus:ring-[#8c5a47]" placeholder="1">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Tipe Transaksi</label>
-                    <select name="type" class="form-select rounded-3" required>
-                        <option value="IN">Stok Masuk (+)</option>
-                        <option value="OUT">Stok Keluar (-)</option>
-                    </select>
+
+                <!-- Catatan -->
+                <div>
+                    <label class="block text-xs font-bold text-[#3a2e2b] mb-1">Catatan / Keterangan (Opsional)</label>
+                    <input type="text" name="notes" value="{{ old('notes') }}" 
+                        class="w-full px-4 py-2.5 rounded-xl border border-[#d3c5b4] text-xs focus:ring-2 focus:ring-[#8c5a47]" placeholder="Contoh: Penjualan toko fisik / Restock supplier">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Jumlah Botol</label>
-                    <input type="number" name="quantity" class="form-control rounded-3" min="1" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Catatan / Keterangan</label>
-                    <textarea name="notes" class="form-control rounded-3" rows="2" placeholder="Contoh: Restock dari supplier"></textarea>
-                </div>
-                <button type="submit" class="btn btn-custom-main w-100">Simpan Mutasi</button>
+
+                <button type="submit" class="w-full py-3 bg-[#8c5a47] hover:bg-[#6e4435] text-white font-bold rounded-xl text-xs transition">
+                    Simpan Transaksi Mutasi Stok
+                </button>
             </form>
         </div>
-    </div>
 
-    <!-- Riwayat Transaksi -->
-    <div class="col-md-8">
-        <div class="card border-0 shadow-sm rounded-4 p-3">
-            <h6 class="fw-bold p-2 mb-0">Riwayat Mutasi Stok</h6>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+        <!-- Ringkasan Sisa Stok Saat Ini -->
+        <div class="bg-white p-6 rounded-[22px] border border-[#d3c5b4] shadow-sm">
+            <h3 class="text-sm font-bold text-[#2c1d11] mb-3">📦 Monitoring Sisa Stok Real-Time</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Parfum</th>
-                            <th>Tipe</th>
-                            <th>Jumlah</th>
-                            <th>Catatan</th>
+                        <tr class="bg-[#f5efe6] text-[#736356] text-xs">
+                            <th class="py-2.5 px-4">SKU</th>
+                            <th class="py-2.5 px-4">Nama Parfum</th>
+                            <th class="py-2.5 px-4">Harga Unit</th>
+                            <th class="py-2.5 px-4">Sisa Stok</th>
+                            <th class="py-2.5 px-4">Batas Min. Stok</th>
+                            <th class="py-2.5 px-4">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($movements as $m)
-                        <tr>
-                            <td class="small">{{ $m->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="fw-bold">{{ $m->product->name ?? '-' }}</td>
-                            <td>
-                                <span class="badge {{ $m->type === 'IN' ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $m->type === 'IN' ? 'MASUK' : 'KELUAR' }}
-                                </span>
+                    <tbody class="text-[#3a2e2b] text-xs font-medium">
+                        @forelse($products as $product)
+                        <tr class="border-b border-[#f5efe6] hover:bg-[#fdfbf7]">
+                            <td class="py-2.5 px-4 font-bold">{{ $product->sku ?? '-' }}</td>
+                            <td class="py-2.5 px-4">{{ $product->name }}</td>
+                            <td class="py-2.5 px-4">Rp {{ number_format($product->price ?? 0, 0, ',', '.') }}</td>
+                            <td class="py-2.5 px-4 font-extrabold text-sm {{ $product->stock <= ($product->minimum_stock ?? 5) ? 'text-red-600' : 'text-[#8c5a47]' }}">
+                                {{ $product->stock }} Botol
                             </td>
-                            <td>{{ $m->quantity }} botol</td>
-                            <td class="small text-muted">{{ $m->notes ?? '-' }}</td>
+                            <td class="py-2.5 px-4">{{ $product->minimum_stock ?? 5 }} Botol</td>
+                            <td class="py-2.5 px-4">
+                                @if($product->stock <= ($product->minimum_stock ?? 5))
+                                    <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-[10px] font-bold">⚠️ Stok Kritis</span>
+                                @else
+                                    <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">✅ Aman</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">Belum ada riwayat mutasi stok.</td>
+                            <td colspan="6" class="py-4 text-center text-[#736356] text-xs">Belum ada data produk.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -91,5 +119,4 @@
             </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

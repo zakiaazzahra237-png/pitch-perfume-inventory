@@ -1,39 +1,43 @@
-# 🌸 Pitch.Perfume - Perfume Inventory Management System
+# 🍾 Pitch.Perfume - Inventory Management System
 
-Sistem Manajemen Inventaris Parfum berbasis web yang dirancang khusus untuk mempermudah pengelolaan stok, pemantauan varian produk, serta pencatatan mutasi stok keluar-masuk secara *realtime*.
-
----
-
-## 🎨 Visual Identity & Theme
-Aplikasi ini dihiasi dengan palet warna elegan bertema **Warm Mahogany & Nude**:
-* **Dark Mahogany**: `#291C0E`
-* **Medium Mahogany**: `#6E473B`
-* **Accent Taupe**: `#A78D78`
-* **Soft Neutral**: `#BEB5A9`
-* **Background Nude**: `#E1D4C2`
+Aplikasi manajemen inventaris stok parfum berbasis web yang dibangun menggunakan **Laravel 10**, **Tailwind CSS**, dan **Chart.js**. Sistem ini dirancang untuk mencatat stok produk, memantau mutasi stok (masuk/keluar), memberikan notifikasi stok kritis, serta menerapkan Role-Based Access Control (RBAC) antara **Admin** dan **Staff**.
 
 ---
 
 ## 🚀 Fitur Utama
-* **Dashboard Overview**: Ringkasan realtime total varian, total stok botol, dan statistik stok kritis.
-* **Katalog Produk**: Daftar lengkap parfum beserta harga beli/jual, kategori, dan modal form untuk penambahan varian baru.
-* **Mutasi Stok (IN/OUT)**: Pencatatan stok masuk dan stok keluar lengkap dengan validasi stok minimum serta riwayat transaksi.
-* **User Personalization**: Tampilan antarmuka yang disesuaikan khusus untuk pengguna (**Zakia**).
+
+- **Authentication & RBAC (Role-Based Access Control)**
+  - **Admin**: Akses penuh ke Dashboard, CRUD Katalog Produk, dan Mutasi Stok.
+  - **Staff**: Akses terbatas hanya untuk Dashboard Monitoring dan Input Mutasi Stok.
+- **Dashboard Analytics & Real-Time Chart**
+  - Monitoring Total Varian, Total Stok Botol, Stok Kritis, dan Penjualan Hari Ini.
+  - Grafik visual interaktif jumlah stok per produk menggunakan **Chart.js**.
+  - Panel notifikasi otomatis untuk produk yang mencapai/melewati batas `minimum_stock`.
+- **Katalog Produk (CRUD)**
+  - Tambah, edit, hapus, dan cari data varian parfum lengkap dengan SKU, harga, stok awal, dan minimum stok.
+  - Format mata uang otomatis (Rupiah).
+- **Mutasi Stok (Stock Mutation)**
+  - Pencatatan transaksi **Stok Masuk (Stock-In)** dan **Stok Keluar (Stock-Out)** secara *real-time*.
+  - Otomatis memperbarui sisa stok pada tabel produk.
 
 ---
 
 ## 🛠️ Tech Stack
-* **Framework**: Laravel 10 (PHP 8.x)
-* **Database**: MySQL
-* **Frontend**: Bootstrap 5, FontAwesome 6, Blade Templating
-* **Architecture**: Model-View-Controller (MVC)
+
+- **Framework Backend**: Laravel 10 (PHP 8.x)
+- **Frontend & Styling**: Blade Templating, Tailwind CSS
+- **Visualization**: Chart.js
+- **Database**: MySQL / MariaDB
 
 ---
 
-## ⚙️ Cara Install & Menjalankan Proyek
+## ⚙️ Panduan Instalasi & Pengoperasian
 
-### 1. Clone Repositori & Install Dependencies
+Ikuti langkah-langkah berikut untuk menjalankan project di lingkungan lokal:
+
+### 1. Clone Repository & Install Dependency
 ```bash
-git clone [https://github.com/zakiaazzahra237-png/perfume-inventory.git](https://github.com/zakiaazzahra237-png/perfume-inventory.git)
-cd inventory-laravel
+git clone [https://github.com/username-kamu/pitch-perfume.git](https://github.com/username-kamu/pitch-perfume.git)
+cd pitch-perfume
 composer install
+npm install && npm run build

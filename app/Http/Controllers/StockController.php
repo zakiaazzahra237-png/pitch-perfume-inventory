@@ -3,42 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\StockMovement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller
 {
     public function index()
     {
         $products = Product::all();
-        $movements = StockMovement::with('product')->latest()->get();
-
-        return view('stock.index', compact('products', 'movements'));
+        return view('stock.index', compact('products'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'type'       => 'required|in:IN,OUT',
-            'quantity'   => 'required|integer|min:1',
-            'notes'      => 'nullable|string',
+        $request->validate([
+            'product_id' => ['required', 'exists:products,id'],
+            'type' => ['required', 'in:in,out'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'notes' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        DB::transaction(function () use ($request) {
+            $product = Product::lockForUpdate()->findOrFail($request->product_id);
 
-        if ($request->type === 'OUT' && $product->stock < $request->quantity) {
-            return back()->with('error', 'Stok tidak mencukupi untuk transaksi keluar!');
-        }
+            // Validasi jika stok keluar melebihi sisa stok
+            if ($request->type === 'out' && $product->stock < $request->quantity) {
+                return back()->withErrors(['quantity' => 'Stok tidak mencukupi! Sisa stok saat ini: ' . $product->stock . ' botol.'])->withInput();
+            }
 
-        if ($request->type === 'IN') {
-            $product->increment('stock', $request->quantity);
-        } else {
-            $product->decrement('stock', $request->quantity);
-        }
+            // Update jumlah stok
+            if ($request->type === 'in') {
+                $product->increment('stock', $request->quantity);
+            } else {
+                $product->decrement('stock', $request->quantity);
+            }
+        });
 
-        StockMovement::create($validated);
-
-        return redirect()->route('stock.index')->with('success', 'Catatan stok berhasil diperbarui!');
+        return redirect()->route('stock.index')->with('success', 'Mutasi stok berhasil dicatat!');
     }
 }
